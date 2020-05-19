@@ -1,4 +1,5 @@
 from pybulletgym.envs.roboschool.robots.robot_bases import MJCFBasedRobot
+import gym
 import numpy as np
 
 class GraspBox(MJCFBasedRobot):
@@ -8,35 +9,52 @@ class GraspBox(MJCFBasedRobot):
     max_object_placement_radius = 0.8
 
     def __init__(self):
-        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0", action_dim=20, obs_dim=48)
+        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0", action_dim=21, obs_dim=48)
+        self.action_space = gym.spaces.Box(-0.9*np.ones([21]), 0.9*np.ones([21]))
 
     def robot_specific_reset(self, bullet_client):
         # parts
-        self.fingertip = self.parts["robot0:thbase"]
+        self.fingertip = self.parts["robot0:vertical slider"]
         self.target = self.parts["target"]
         self.object = self.parts["object"]
 
-        # joints
-        self.shoulder_pan_joint = self.jdict["robot0:WRJ1"]
-        self.shoulder_lift_joint = self.jdict["robot0:WRJ0"]
-        self.upper_arm_roll_joint = self.jdict["robot0:FFJ3"]
-        self.elbow_flex_joint = self.jdict["robot0:FFJ2"]
-        self.forearm_roll_joint = self.jdict["robot0:FFJ1"]
-        self.wrist_flex_joint = self.jdict["robot0:MFJ3"]
-        self.wrist_roll_joint = self.jdict["robot0:MFJ2"]
+        print(self.jdict)
+        self.jname = ["robot0:slider",
+                      "robot0:WRJ1", "robot0:WRJ0",
+                      "robot0:FFJ3", "robot0:FFJ2", "robot0:FFJ1",
+                      "robot0:MFJ3", "robot0:MFJ2", "robot0:MFJ1", "robot0:LFJ4",
+                      "robot0:LFJ3", "robot0:LFJ2", "robot0:LFJ1",
+                      "robot0:THJ4", "robot0:THJ3", "robot0:THJ2", "robot0:THJ1", "robot0:THJ0"]
+        # ranges of each joint in the hand, described in grasp_block.xml
+        self.ctrlrange = [[0, 0.6],
+                          [-0.489, 0.14], [-0.698, 0.489],
+                          [-0.349, 0.349], [0, 0.1571], [0, 0.1571],
+                          [-0.349, 0.349], [0, 0.1571], [0, 0.1571],
+                          [-0.349, 0.349], [0, 0.1571], [0, 0.1571], [0, 0.785],
+                          [-0.349, 0.349], [0, 0.1571], [0, 0.1571],
+                          [-1.047, 1.047], [0, 1.222], [-0.209, 0.209], [-0.524, 0.524], [-1.571, 0]]
+        self.forcerange = [[-1.0, 1.0],
+                           [-4.784, 4.785], [-2.175, 2.174],
+                           [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245],
+                           [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245],
+                           [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245], [-0.9, 0.9],
+                           [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245],
+                           [-2.3722, 2.3722], [-1.45, 1.45], [-0.99, 0.99], [-0.99, 0.99], [-0.81, 0.81]]
+
+        self.joints = []
+        for name in self.jname:
+            self.joints.append(self.jdict[name])
 
         self._object_hit_ground = False
         self._object_hit_location = None
 
+        print("#################################")
+
         # reset position and speed of manipulator
         # TODO: Will this work or do we have to constrain this resetting in some way?
-        self.shoulder_pan_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.shoulder_lift_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.upper_arm_roll_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.elbow_flex_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.forearm_roll_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.wrist_flex_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
-        self.wrist_roll_joint.reset_current_position(self.np_random.uniform(low=-3.14, high=3.14), 0)
+        for joint in self.joints:
+            joint.reset_current_position(0, 0)
+
 
         self.zero_offset = np.array([0.45, 0.55, 0])
         self.object_pos = np.concatenate([
@@ -70,13 +88,8 @@ class GraspBox(MJCFBasedRobot):
 
     def apply_action(self, a):
         assert (np.isfinite(a).all())
-        self.shoulder_pan_joint.set_motor_torque(0.05 * float(np.clip(a[0], -1, +1)))
-        self.shoulder_lift_joint.set_motor_torque(0.05 * float(np.clip(a[1], -1, +1)))
-        self.upper_arm_roll_joint.set_motor_torque(0.05 * float(np.clip(a[2], -1, +1)))
-        self.elbow_flex_joint.set_motor_torque(0.05 * float(np.clip(a[3], -1, +1)))
-        self.forearm_roll_joint.set_motor_torque(0.05 * float(np.clip(a[4], -1, +1)))
-        self.wrist_flex_joint.set_motor_torque(0.05 * float(np.clip(a[5], -1, +1)))
-        self.wrist_roll_joint.set_motor_torque(0.05 * float(np.clip(a[6], -1, +1)))
+        for i, joint in enumerate(self.joints):
+            joint.set_motor_torque(0.01 * float(np.clip(a[i], self.forcerange[i][0], self.forcerange[i][1])))
 
     def calc_state(self):
         self.to_target_vec = self.target_pos - self.object_pos

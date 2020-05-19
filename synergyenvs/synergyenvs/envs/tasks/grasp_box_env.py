@@ -20,15 +20,15 @@ class GraspBoxEnv(BaseBulletEnv):
         potential_old = self.potential
         self.potential = self.robot.calc_potential()
 
-        joint_vel = np.array([
-            self.robot.shoulder_pan_joint.get_velocity(),
-            self.robot.shoulder_lift_joint.get_velocity(),
-            self.robot.upper_arm_roll_joint.get_velocity(),
-            self.robot.elbow_flex_joint.get_velocity(),
-            self.robot.forearm_roll_joint.get_velocity(),
-            self.robot.wrist_flex_joint.get_velocity(),
-            self.robot.wrist_roll_joint.get_velocity()
-        ])
+        # joint_vel = np.array([
+        #     self.robot.shoulder_pan_joint.get_velocity(),
+        #     self.robot.shoulder_lift_joint.get_velocity(),
+        #     self.robot.upper_arm_roll_joint.get_velocity(),
+        #     self.robot.elbow_flex_joint.get_velocity(),
+        #     self.robot.forearm_roll_joint.get_velocity(),
+        #     self.robot.wrist_flex_joint.get_velocity(),
+        #     self.robot.wrist_roll_joint.get_velocity()
+        # ])
 
         # It doesnt work ;;. add gomakashi
         # action_product = np.matmul(np.abs(a), np.abs(joint_vel))
@@ -64,7 +64,5 @@ class GraspBoxEnv(BaseBulletEnv):
         return state, sum(self.rewards), False, {}
 
     def camera_adjust(self):
-        x, y, z = self.robot.fingertip.pose().xyz()
-        x *= 0.5
-        y *= 0.5
-        self.camera.move_and_look_at(0.3, 0.3, 0.3, x, y, z)
+        yaw = 10
+        self.camera.move_and_look_at(50, 1, 1, 1.5, 0.5, 0.5)

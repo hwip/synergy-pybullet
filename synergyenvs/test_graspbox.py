@@ -8,6 +8,7 @@ o = env.reset()
 
 for _ in range(1000):
   env.render()
+  env.camera_adjust()
   a = env.action_space.sample()
   o, r, done, info = env.step(a)
   if done:
