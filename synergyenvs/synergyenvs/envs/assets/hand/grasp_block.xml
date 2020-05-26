@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mujoco model="ShadowHand">
-    <compiler angle="radian" coordinate="local" meshdir="../stls/hand" texturedir="../textures"/>
+    <compiler angle="radian" coordinate="local" meshdir="../stls/hand/" texturedir="../textures"/>
     <option timestep="0.002" iterations="20" apirate="200">
         <flag warmstart="enable"/>
     </option>
@@ -34,6 +34,11 @@
         <default class="robot0:free">
             <joint type="free" damping="0" armature="0" limited="false"/>
         </default>
+
+        <!--default-->
+        <geom friction="1 0.005 0.001" condim="3" margin="0.0005" contype="1" conaffinity="1"/>
+        <joint armature='0.001' damping="0.1" margin="0.01" frictionloss="0.001" limited="true"/>
+        <site size="0.005" rgba="0.4 0.9 0.4 1"/>
     </default>
 
     <contact>
