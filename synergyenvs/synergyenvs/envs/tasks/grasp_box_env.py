@@ -8,6 +8,7 @@ class GraspBoxEnv(BaseBulletEnv):
     def __init__(self):
         self.robot = GraspBox()
         BaseBulletEnv.__init__(self, self.robot)
+        self.camera = Camera(self)
 
     def create_single_player_scene(self, bullet_client):
         return SingleRobotEmptyScene(bullet_client, gravity=0.0, timestep=0.0020, frame_skip=5)
@@ -66,3 +67,15 @@ class GraspBoxEnv(BaseBulletEnv):
     def camera_adjust(self):
         yaw = 10
         self.camera.move_and_look_at(50, 1, 1, 1.5, 0.5, 0.5)
+
+
+class Camera():
+    def __init__(self, env):
+        self.env = env
+        pass
+
+    def move_and_look_at(self, i, j, k, x, y, z):
+        lookat = [x, y, z]
+        distance = 1
+        yaw = 10
+        self.env._p.resetDebugVisualizerCamera(distance, yaw, -20, lookat)
