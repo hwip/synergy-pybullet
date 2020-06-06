@@ -9,7 +9,7 @@ class GraspBox(MJCFBasedRobot):
     max_object_placement_radius = 0.8
 
     def __init__(self):
-        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0", action_dim=21, obs_dim=48)
+        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0", action_dim=21, obs_dim=112)
         self.action_space = gym.spaces.Box(-0.9*np.ones([21]), 0.9*np.ones([21]))
 
     def robot_specific_reset(self, bullet_client):
@@ -18,7 +18,6 @@ class GraspBox(MJCFBasedRobot):
         self.target = self.parts["target"]
         self.object = self.parts["object"]
 
-        print(self.jdict)
         self.jname = ["robot0:slider",
                       "robot0:WRJ1", "robot0:WRJ0",
                       "robot0:FFJ3", "robot0:FFJ2", "robot0:FFJ1",
@@ -47,8 +46,6 @@ class GraspBox(MJCFBasedRobot):
 
         self._object_hit_ground = False
         self._object_hit_location = None
-
-        print("#################################")
 
         # reset position and speed of manipulator
         # TODO: Will this work or do we have to constrain this resetting in some way?
