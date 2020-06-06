@@ -16,7 +16,8 @@ RUN wget http://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O
 RUN apt-get update -y && apt-get -y upgrade && apt-get install -y \
     make build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git \
+    libopenmpi-dev python3-dev zlib1g-dev
 RUN curl https://pyenv.run | zsh && \
     echo '' >> /root/.zshrc && \
     echo 'export PATH="/root/.pyenv/bin:$PATH"' >> /root/.zshrc && \
@@ -60,6 +61,12 @@ RUN source /root/.zshrc && \
     cd gym && \
     pip install -e .
 
+# stable-baselines
+RUN source /root/.zshrc && \
+    git clone https://github.com/hill-a/stable-baselines.git && \
+    cd stable-baselines && \
+    pip install -e .
+
 # Pybullet Gym
 RUN source /root/.zshrc && \
     git clone https://github.com/benelot/pybullet-gym.git && \
@@ -77,5 +84,12 @@ RUN apt-get clean && \
 
 COPY test_pybullet-gym.py /root/
 
-WORKDIR /root
+# pycharm settings
+COPY pycharm-community-2020.1.1.tar.gz /root/
+RUN tar xzf /root/pycharm-community-2020.1.1.tar.gz -C /opt
+
+WORKDIR /root/
 CMD ["terminator"]
+
+
+
