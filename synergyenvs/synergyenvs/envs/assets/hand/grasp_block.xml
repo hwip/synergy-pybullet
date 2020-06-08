@@ -574,7 +574,7 @@
             <geom name="object" type="box" size="0.025 0.025 0.025" material="material:object" condim="4"
                   density="567"/>
             <geom name="object_hidden" type="box" size="0.024 0.024 0.024" material="material:hidden" condim="4"
-                  contype="0" conaffinity="0" mass="0.0l"/>
+                  contype="1" conaffinity="0" mass="0.0l"/>
             <site name="object:center" pos="0 0 0" rgba="1 0 0 0" size="0.01 0.01 0.01"/>
             <joint name="object:joint" type="free" damping="0.01"/>
         </body>
