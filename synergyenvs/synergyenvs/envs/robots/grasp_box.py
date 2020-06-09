@@ -1,6 +1,8 @@
 from pybulletgym.envs.roboschool.robots.robot_bases import MJCFBasedRobot
 import gym
+from gym import error, spaces
 import numpy as np
+
 
 class GraspBox(MJCFBasedRobot):
     min_target_placement_radius = 0.1
@@ -9,8 +11,14 @@ class GraspBox(MJCFBasedRobot):
     max_object_placement_radius = 0.8
 
     def __init__(self):
-        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0", action_dim=21, obs_dim=112)
-        self.action_space = gym.spaces.Box(-0.9*np.ones([21]), 0.9*np.ones([21]))
+        MJCFBasedRobot.__init__(self, "/root/synergyenvs/synergyenvs/envs/assets/hand/grasp_block.xml", "body0",
+                                action_dim=21, obs_dim=106)
+        self.action_space = gym.spaces.Box(-0.9 * np.ones([21]), 0.9 * np.ones([21]), dtype='float32')
+        self.observation_space = spaces.Dict(dict(
+            desired_goal=spaces.Box(-np.inf, np.inf, shape=(3,), dtype='float32'),
+            achieved_goal=spaces.Box(-np.inf, np.inf, shape=(3,), dtype='float32'),
+            observation=spaces.Box(-np.inf, np.inf, shape=(106,), dtype='float32'),
+        ))
 
     def robot_specific_reset(self, bullet_client):
         # parts
@@ -52,7 +60,6 @@ class GraspBox(MJCFBasedRobot):
         for joint in self.joints:
             joint.reset_current_position(0, 0)
 
-
         self.zero_offset = np.array([0.45, 0.55, 0])
         self.object_pos = np.concatenate([
             self.np_random.uniform(low=-1, high=1, size=1),
@@ -61,8 +68,7 @@ class GraspBox(MJCFBasedRobot):
         ])
 
         # make length of vector between min and max_object_placement_radius
-        self.object_pos = self.object_pos \
-                          / np.linalg.norm(self.object_pos) \
+        self.object_pos = self.object_pos / np.linalg.norm(self.object_pos) \
                           * self.np_random.uniform(low=self.min_object_placement_radius,
                                                    high=self.max_object_placement_radius, size=1)
 
@@ -81,20 +87,22 @@ class GraspBox(MJCFBasedRobot):
                           * self.np_random.uniform(low=self.min_target_placement_radius,
                                                    high=self.max_target_placement_radius, size=1)
 
+        self.object.reset_position([1, 0.85, 0.2])
+
         # self.parts["goal"].reset_pose(self.target_pos - self.zero_offset, np.array([0, 0, 0, 1]))
 
     def apply_action(self, a):
         assert (np.isfinite(a).all())
         for i, joint in enumerate(self.joints):
-            joint.set_motor_torque(0.01 * float(np.clip(a[i], self.forcerange[i][0], self.forcerange[i][1])))
+            joint.set_motor_torque(0.1 * float(np.clip(a[i], self.forcerange[i][0], self.forcerange[i][1])))
 
     def calc_state(self):
-        self.to_target_vec = self.target_pos - self.object_pos
-        return np.concatenate([
+        return {
+            "desired_goal" : np.array([1, 0.85, 0.4]),
+            "achieved_goal" : self.object.pose().xyz(),
+            "observation" : np.concatenate([
             np.array([j.current_position() for j in self.ordered_joints]).flatten(),  # all positions
             np.array([j.current_relative_position() for j in self.ordered_joints]).flatten(),  # all speeds
-            self.to_target_vec,
             self.fingertip.pose().xyz(),
-            self.object.pose().xyz(),
-            self.target.pose().xyz(),
-        ])
+            self.object.pose().xyz(),])
+        }
