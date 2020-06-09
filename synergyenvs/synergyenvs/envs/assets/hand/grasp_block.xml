@@ -332,7 +332,7 @@
             <inertial pos="0 0 0" mass="0.001" diaginertia="0.01 0.01 0.01"/>
             <geom name="vertical slider" type="box" size="0.01 0.010 0.01"/>
             <joint name="robot0:slider" type="slide" pos="0 0 0" axis="0 0 1" range="-0.6 0.6" armature="0.001" damping="1"/>
-            <body name="robot0:hand mount" pos="0 0 0" euler="1.5708 0 0">
+            <body name="robot0:hand mount" pos="0 0 0" quat="0.7071 0.7071 0.0 0.0" euler="1.5708 0 0">
                 <inertial mass="0.001" pos="0 0 0" diaginertia="0.001 0.001 0.001"/>
                 <body childclass="robot0:asset_class" name="robot0:forearm" pos="0 0.01 0" euler="0 0 0">
                     <inertial pos="0.001 -0.002 0.29" quat="0.982 -0.016 0 -0.188" mass="0.001"
@@ -571,9 +571,9 @@
 
         <body name="object" pos="1 0.85 0.2">
             <geom name="object" type="box" size="0.025 0.025 0.025" material="material:object" condim="4"
-                  density="567"/>
+                  mass="0.0001"/>
             <geom name="object_hidden" type="box" size="0.024 0.024 0.024" material="material:hidden" condim="4"
-                  contype="0" conaffinity="0" mass="0.0l"/>
+                  contype="1" conaffinity="0" mass="0.0001"/>
             <site name="object:center" pos="0 0 0" rgba="1 0 0 0" size="0.01 0.01 0.01"/>
             <joint name="object:joint" type="free" damping="0.01"/>
         </body>
