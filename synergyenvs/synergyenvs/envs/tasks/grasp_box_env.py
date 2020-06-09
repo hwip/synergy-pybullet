@@ -76,6 +76,6 @@ class Camera():
 
     def move_and_look_at(self, i, j, k, x, y, z):
         lookat = [x, y, z]
-        distance = 1
-        yaw = 10
+        distance = 0.5
+        yaw = 5
         self.env._p.resetDebugVisualizerCamera(distance, yaw, -20, lookat)
