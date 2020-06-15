@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y ffmpeg nodejs npm
 RUN source /root/.zshrc && \
     pip install setuptools moviepy jupyterlab && \
     pip install torch==1.3.1+cu92 torchvision==0.4.2+cu92 -f https://download.pytorch.org/whl/torch_stable.html && \
-    pip install tensorflow-gpu==1.14.0 mpi4py && \
+    pip install tensorflow-gpu==1.15.0 mpi4py && \
     echo 'alias jl="DISPLAY=:0 jupyter lab --ip 0.0.0.0 --port 8888 --allow-root &"' >> /root/.zshrc && \
     echo 'alias tb="tensorboard --logdir runs --bind_all &"' >> /root/.zshrc
 
