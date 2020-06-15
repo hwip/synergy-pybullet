@@ -5,5 +5,5 @@ setup(name='synergyenvs',
       install_requires=[
           'pybullet>=1.7.8',
       ],
-      package_data={'synergyenvs': "envs/assets/hand/*.xml"}
+      package_data={'synergyenvs':[ "envs/assets/hand/*.xml"]}
 )

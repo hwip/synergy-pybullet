@@ -12,15 +12,12 @@ env.render()
 o = env.reset()
 
 # model = PPO2(MlpPolicy, env, verbose=1)
-model = HER('MlpPolicy', env, DDPG, n_sampled_goal=4, verbose=1)
-model.learn(50000)
-
-model.save("./her_graspbox-1")
+model = HER('MlpPolicy', env, DDPG, n_sampled_goal=4, verbose=0)
+model.load("./her_graspbox-1")
 
 env.camera_adjust()
 
-for _ in range(1000):
-    o = env.reset()
+for _ in range(10000):
     env.render()
     action, _states = model.predict(o)
     # action = env.action_space.sample()
@@ -28,6 +25,6 @@ for _ in range(1000):
     print(o, r, done, info)
     if done:
       o = env.reset()
-    time.sleep(0.2)
+    time.sleep(0.1)
 
 env.close()

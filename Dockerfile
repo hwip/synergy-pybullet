@@ -16,7 +16,8 @@ RUN wget http://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O
 RUN apt-get update -y && apt-get -y upgrade && apt-get install -y \
     make build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git \
+    libopenmpi-dev python3-dev zlib1g-dev
 RUN curl https://pyenv.run | zsh && \
     echo '' >> /root/.zshrc && \
     echo 'export PATH="/root/.pyenv/bin:$PATH"' >> /root/.zshrc && \
@@ -47,7 +48,7 @@ RUN apt-get update && apt-get install -y ffmpeg nodejs npm
 RUN source /root/.zshrc && \
     pip install setuptools moviepy jupyterlab && \
     pip install torch==1.3.1+cu92 torchvision==0.4.2+cu92 -f https://download.pytorch.org/whl/torch_stable.html && \
-    pip install tensorflow-gpu==2.0.0 && \
+    pip install tensorflow-gpu==1.15.0 mpi4py && \
     echo 'alias jl="DISPLAY=:0 jupyter lab --ip 0.0.0.0 --port 8888 --allow-root &"' >> /root/.zshrc && \
     echo 'alias tb="tensorboard --logdir runs --bind_all &"' >> /root/.zshrc
 
@@ -58,6 +59,12 @@ RUN apt-get update && apt-get install -y icewm terminator
 RUN source /root/.zshrc && \
     git clone https://github.com/openai/gym.git && \
     cd gym && \
+    pip install -e .
+
+# stable-baselines
+RUN source /root/.zshrc && \
+    git clone https://github.com/hill-a/stable-baselines.git && \
+    cd stable-baselines && \
     pip install -e .
 
 # Pybullet Gym
@@ -77,5 +84,12 @@ RUN apt-get clean && \
 
 COPY test_pybullet-gym.py /root/
 
-WORKDIR /root
+# pycharm settings
+COPY pycharm-community-2020.1.1.tar.gz /root/
+RUN tar xzf /root/pycharm-community-2020.1.1.tar.gz -C /opt
+
+WORKDIR /root/
 CMD ["terminator"]
+
+
+
