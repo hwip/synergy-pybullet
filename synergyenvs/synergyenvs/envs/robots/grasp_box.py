@@ -22,8 +22,8 @@ class GraspBox(MJCFBasedRobot):
         self.jname = ["robot0:slider",
                       "robot0:WRJ1", "robot0:WRJ0",
                       "robot0:FFJ3", "robot0:FFJ2", "robot0:FFJ1",
-                      "robot0:MFJ3", "robot0:MFJ2", "robot0:MFJ1", "robot0:LFJ4",
-                      "robot0:RFJ3", "robot0:RFJ2", "robot0:RFJ1",
+                      "robot0:MFJ3", "robot0:MFJ2", "robot0:MFJ1",
+                      "robot0:RFJ3", "robot0:RFJ2", "robot0:RFJ1", "robot0:LFJ4",
                       "robot0:LFJ3", "robot0:LFJ2", "robot0:LFJ1",
                       "robot0:THJ4", "robot0:THJ3", "robot0:THJ2", "robot0:THJ1", "robot0:THJ0"]
         self.djname = ["robot0:FFJ0", "robot0:MFJ0", "robot0:RFJ0", "robot0:LFJ0"]
@@ -42,8 +42,18 @@ class GraspBox(MJCFBasedRobot):
                            [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245], [-0.9, 0.9],
                            [-0.9, 0.9], [-0.9, 0.9], [-0.7245, 0.7245],
                            [-2.3722, 2.3722], [-1.45, 1.45], [-0.99, 0.99], [-0.99, 0.99], [-0.81, 0.81]])
+        self.initpose = np.array([0.12,
+                                  0, 0,
+                                  0, np.pi/3, np.pi/4,
+                                  0, np.pi/3, np.pi/4,
+                                  0, np.pi/3, np.pi/4, 0,
+                                  0, np.pi/3, np.pi/4,
+                                  -0.7, 0.5, 0, 0.3, 0])
+        self.control_method = 'position'
 
     def robot_specific_reset(self, bullet_client):
+        # Initialize environment in each step
+
         # parts
         self.fingertip = self.parts["robot0:vertical slider"]
         self.target = self.parts["target"]
@@ -57,32 +67,36 @@ class GraspBox(MJCFBasedRobot):
         for name in self.djname:
             self.distal_joints.append(self.jdict[name])
 
-        self._object_hit_ground = False
-        self._object_hit_location = None
-
         # reset position and speed of manipulator
         # TODO: Will this work or do we have to constrain this resetting in some way?
-        for joint in self.joints:
-            joint.reset_current_position(0, 0)
-        self.joints[0].reset_current_position(0, 0)
+        for i, joint in enumerate(self.joints):
+            joint.reset_current_position(self.initpose[i], 0)
 
-        self.zero_offset = np.array([0.45, 0.55, 0])
+        for djoint in self.distal_joints:
+            djoint.reset_current_position(np.pi/2, 0)
 
         # reset object position
-        self.object.reset_orientation([1,1,1,1])
-        self.object.reset_position([1, 0.85, 0.205])
+        self.object.reset_orientation([1, 1, 1, 1])
+        self.object.reset_position([1, 0.88, 0.395])
         self.object.reset_velocity([0, 0, 0])
 
     def apply_action(self, a):
         assert (np.isfinite(a).all())
-        actuation_range = (self.ctrlrange[:, 1] - self.ctrlrange[:, 0]) / 2
-        actuation_center = (self.ctrlrange[:, 1] + self.ctrlrange[:, 0]) / 2
+        rng = None
+        if self.control_method == 'force':
+            rng = self.forcerange
+        elif self.control_method == 'position':
+            rng = self.ctrlrange
+        actuation_range = (rng[:, 1] - rng[:, 0]) / 2
+        actuation_center = (rng[:, 1] + rng[:, 0]) / 2
         nxt = actuation_center + a * actuation_range
-        nxt = np.clip(nxt, self.ctrlrange[:, 0], self.ctrlrange[:, 1])
+        nxt = np.clip(nxt, rng[:, 0], rng[:, 1])
         for i, joint in enumerate(self.joints):
-            pass
-            # joint.set_motor_torque(0.01 * nxt[i])
-            joint.set_position(nxt[i])
+            if self.control_method == 'force':
+                joint.set_motor_torque(0.01 * nxt[i])
+            elif self.control_method == 'position':
+                joint.set_position(nxt[i])
+        # DIP joints in Shadow Dexterous Hand are coupled with PIP joints corresponding to the finger.
         self.distal_joints[0].set_position(nxt[5])
         self.distal_joints[1].set_position(nxt[8])
         self.distal_joints[2].set_position(nxt[12])

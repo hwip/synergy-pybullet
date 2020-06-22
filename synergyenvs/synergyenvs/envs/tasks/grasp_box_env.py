@@ -9,6 +9,8 @@ class GraspBoxEnv(BaseBulletEnv):
         self.robot = GraspBox()
         BaseBulletEnv.__init__(self, self.robot)
         self.camera = Camera(self)
+        self.reward_type = 'sparse'
+        self.distance_threshold = 0.05
 
     def create_single_player_scene(self, bullet_client):
         return SingleRobotEmptyScene(bullet_client, gravity=9.8, timestep=0.0020, frame_skip=5)
@@ -20,15 +22,16 @@ class GraspBoxEnv(BaseBulletEnv):
 
         # reward = - 100 * np.linalg.norm(self.robot.object.pose().xyz() - [1, 0.87, 0.4])
         reward = self.compute_reward(state["achieved_goal"], state["desired_goal"], {})
+        print(reward)
         self.HUD(state, a, True)
         return state, reward, False, {}
 
     def compute_reward(self, achieved_goal, desired_goal, info):
         dist = np.linalg.norm(achieved_goal - desired_goal, ord=2)
-        reward = -1000*dist
-        if dist <= 0.00001:
-            reward = reward + 10
-        return reward
+        if self.reward_type == 'sparse':
+            return -(dist > self.distance_threshold).astype(np.float32)
+        else:
+            return -dist
 
     def camera_adjust(self):
         yaw = 10
