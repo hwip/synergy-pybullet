@@ -1,0 +1,12 @@
+
+*.pyc
+
+synergyenvs/synergyenvs/envs/assets/stls/.get
+
+synergyenvs/synergyenvs/envs/.idea/
+
+synergyenvs/synergyenvs.egg-info/
+
+.idea/
+
+*.gz
