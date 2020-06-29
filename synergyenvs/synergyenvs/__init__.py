@@ -9,3 +9,9 @@ register(
     entry_point='synergyenvs.envs.tasks.grasp_box_env:GraspBoxEnv',
     max_episode_steps=100,
 )
+
+register(
+    id='SimpleGripperGraspBoxPybullet-v0',
+    entry_point='synergyenvs.envs.tasks.simple_gripper_grasp_box_env:SimpleGripperGraspBoxEnv',
+    max_episode_steps=100,
+)

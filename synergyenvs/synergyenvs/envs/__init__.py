@@ -1,1 +1,2 @@
 from synergyenvs.envs.tasks.grasp_box_env import GraspBoxEnv
+from synergyenvs.envs.tasks.simple_gripper_grasp_box_env import SimpleGripperGraspBoxEnv
