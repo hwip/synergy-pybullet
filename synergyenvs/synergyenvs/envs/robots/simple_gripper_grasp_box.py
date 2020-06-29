@@ -1,7 +1,9 @@
 from pybulletgym.envs.roboschool.robots.robot_bases import URDFBasedRobot
+import pybullet
 import gym
 from gym import error, spaces
 import numpy as np
+import os, inspect
 
 class SimpleGripperGraspBox(URDFBasedRobot):
     metadata = {
@@ -25,6 +27,41 @@ class SimpleGripperGraspBox(URDFBasedRobot):
         self.jname = ["table_to_base", "base_to_right_finger", "base_to_left_finger"]
         self.control_method = 'position'
         self.object_loading = False
+        self.gripper_loading = False
+
+    def reset(self, bullet_client):
+        self._p = bullet_client
+        self.ordered_joints = []
+
+        full_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "robots", self.model_urdf)
+        if not self.gripper_loading:
+            self.gripper_loading = True
+            if self.self_collision:
+                self.parts, self.jdict, self.ordered_joints, self.robot_body = self.addToScene(self._p,
+                                                                                               self._p.loadURDF(
+                                                                                                   full_path,
+                                                                                                   basePosition=self.basePosition,
+                                                                                                   baseOrientation=self.baseOrientation,
+                                                                                                   useFixedBase=self.fixed_base,
+                                                                                                   flags=pybullet.URDF_USE_SELF_COLLISION))
+            else:
+                self.parts, self.jdict, self.ordered_joints, self.robot_body = self.addToScene(self._p,
+                                                                                               self._p.loadURDF(
+                                                                                                   full_path,
+                                                                                                   basePosition=self.basePosition,
+                                                                                                   baseOrientation=self.baseOrientation,
+                                                                                                   useFixedBase=self.fixed_base))
+
+        for j in self.jdict.values():
+            j.unlock_joint()
+
+        self.robot_specific_reset(self._p)
+        self._p.setGravity(0, 0, -9.8)
+
+        s = self.calc_state()  # optimization: calc_state() can calculate something in self.* for calc_potential() to use
+        self.potential = self.calc_potential()
+
+        return s
 
     def robot_specific_reset(self, bullet_client):
         if not self.object_loading:
