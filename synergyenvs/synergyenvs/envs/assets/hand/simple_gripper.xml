@@ -57,7 +57,7 @@
 
     <link name="right_finger">
         <contact>
-            <lateral_friction value="500.0"/>
+            <lateral_friction value="1000.0"/>
             <spinning_friction value=".1"/>
         </contact>
         <visual>
@@ -76,7 +76,7 @@
     </link>
     <link name="left_finger">
         <contact>
-            <lateral_friction value="500.0"/>
+            <lateral_friction value="1000.0"/>
             <spinning_friction value=".1"/>
         </contact>
         <visual>

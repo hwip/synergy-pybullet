@@ -5,6 +5,7 @@ from gym import error, spaces
 import numpy as np
 import os, inspect
 
+
 class SimpleGripperGraspBox(URDFBasedRobot):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -58,7 +59,7 @@ class SimpleGripperGraspBox(URDFBasedRobot):
         self.robot_specific_reset(self._p)
         self._p.setGravity(0, 0, -9.8)
 
-        s = self.calc_state()  # optimization: calc_state() can calculate something in self.* for calc_potential() to use
+        s = self.calc_state() # optimization: calc_state() can calculate something in self.* for calc_potential() to use
         self.potential = self.calc_potential()
 
         return s
@@ -68,7 +69,7 @@ class SimpleGripperGraspBox(URDFBasedRobot):
             self.object_parts, _, _, _ = self.addToScene(self._p,
                                                    self._p.loadURDF("/root/synergyenvs/synergyenvs/envs/assets/block.urdf",
                                                                     basePosition=[0, -0.4, 0.2],
-                                                                    baseOrientation=[1,1,1,1],
+                                                                    baseOrientation=[1, 1, 1, 1],
                                                                     useFixedBase=self.fixed_base,
                                                                     flags=self._p.URDF_USE_SELF_COLLISION))
             self.object_loading = True
@@ -97,7 +98,7 @@ class SimpleGripperGraspBox(URDFBasedRobot):
 
         # reset object position
         self.object.reset_orientation([1, 1, 1, 1])
-        self.object.reset_position([0, -0.4, 0.2])
+        self.object.reset_position([0 + np.random.uniform(-0.1, 0.1), -0.4 + np.random.uniform(-0.1, 0.1), 0.2])
         self.object.reset_velocity([0, 0, 0])
 
     def apply_action(self, a):

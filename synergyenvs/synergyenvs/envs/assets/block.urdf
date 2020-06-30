@@ -2,7 +2,7 @@
 <robot name="block_2">
   <link name="block_2_base_link">
     <contact>
-      <lateral_friction value="500.0"/>
+      <lateral_friction value="10000.0"/>
       <spinning_friction value=".1"/>
     </contact>
     <inertial>
